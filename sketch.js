@@ -1,50 +1,68 @@
-let s1, s2;
-let gravity = 9.0;
-let mass = 2.0;
+// Symmetry corresponding to the number of reflections. Change the number for different number of reflections 
+let symmetry = 6;   
 
-function setup() {
-  createCanvas(720, 400);
-  fill(255, 126);
-  // Inputs: x, y, mass, gravity
-  s1 = new Spring2D(0.0, width / 2, mass, gravity);
-  s2 = new Spring2D(0.0, width / 2, mass, gravity);
+let angle = 360 / symmetry;
+let saveButton, clearButton, mouseButton, keyboardButton;
+let slider;
+
+function setup() { 
+  createCanvas(710, 710);
+  angleMode(DEGREES);
+  background(127);
+
+  // Creating the save button for the file
+  saveButton = createButton('save');
+  saveButton.mousePressed(saveFile);
+
+  // Creating the clear screen button
+  clearButton = createButton('clear');
+  clearButton.mousePressed(clearScreen);
+
+  // Creating the button for Full Screen
+  fullscreenButton = createButton('Full Screen');
+  fullscreenButton.mousePressed(screenFull);
+
+  // Setting up the slider for the thickness of the brush
+  brushSizeSlider = createButton('Brush Size Slider');
+  sizeSlider = createSlider(1, 32, 4, 0.1);
+}
+
+// Save File Function
+function saveFile() {
+  save('design.jpg');
+}
+
+// Clear Screen function
+function clearScreen() {
+  background(127);
+}
+
+// Full Screen Function
+function screenFull() {
+  let fs = fullscreen();
+  fullscreen(!fs);
 }
 
 function draw() {
-  background(0);
-  s1.update(mouseX, mouseY);
-  s1.display(mouseX, mouseY);
-  s2.update(s1.x, s1.y);
-  s2.display(s1.x, s1.y);
-}
+  translate(width / 2, height / 2);
 
-function Spring2D(xpos, ypos, m, g) {
-  this.x = xpos;// The x- and y-coordinates
-  this.y = ypos;
-  this.vx = 0; // The x- and y-axis velocities
-  this.vy = 0;
-  this.mass = m;
-  this.gravity = g;
-  this.radius = 30;
-  this.stiffness = 0.2;
-  this.damping = 0.7;
-
-  this.update = function(targetX, targetY) {
-    let forceX = (targetX - this.x) * this.stiffness;
-    let ax = forceX / this.mass;
-    this.vx = this.damping * (this.vx + ax);
-    this.x += this.vx;
-    let forceY = (targetY - this.y) * this.stiffness;
-    forceY += this.gravity;
-    let ay = forceY / this.mass;
-    this.vy = this.damping * (this.vy + ay);
-    this.y += this.vy;
-  }
-
-  this.display = function(nx, ny) {
-    noStroke();
-    ellipse(this.x, this.y, this.radius * 2, this.radius * 2);
-    stroke(255);
-    line(this.x, this.y, nx, ny);
+  if (mouseX > 0 && mouseX < width && mouseY > 0 && mouseY < height) {
+    let mx = mouseX - width / 2;
+    let my = mouseY - height / 2;
+    let pmx = pmouseX - width / 2;
+    let pmy = pmouseY - height / 2;
+    
+    if (mouseIsPressed) {
+      for (let i = 0; i < symmetry; i++) {
+        rotate(angle);
+        let sw = sizeSlider.value();
+        strokeWeight(sw);
+        line(mx, my, pmx, pmy);
+        push();
+        scale(1, -1);
+        line(mx, my, pmx, pmy);
+        pop();
+      }
+    }
   }
 }
